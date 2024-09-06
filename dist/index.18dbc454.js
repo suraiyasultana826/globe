@@ -592,6 +592,10 @@ var _vertexGlsl = require("../shaders/vertex.glsl");
 var _vertexGlslDefault = parcelHelpers.interopDefault(_vertexGlsl);
 var _fragmentGlsl = require("../shaders/fragment.glsl");
 var _fragmentGlslDefault = parcelHelpers.interopDefault(_fragmentGlsl);
+var _atmosphereVertexGlsl = require("../shaders/atmosphereVertex.glsl");
+var _atmosphereVertexGlslDefault = parcelHelpers.interopDefault(_atmosphereVertexGlsl);
+var _atmosphereFragmentGlsl = require("../shaders/atmosphereFragment.glsl");
+var _atmosphereFragmentGlslDefault = parcelHelpers.interopDefault(_atmosphereFragmentGlsl);
 console.log((0, _vertexGlslDefault.default));
 const scene = new _three.Scene();
 const camera = new _three.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -613,14 +617,33 @@ const sphere = new _three.Mesh(new _three.SphereGeometry(5, 50, 50), new _three.
 }));
 console.log(sphere);
 scene.add(sphere);
+//create atmosphere
+const atmosphere = new _three.Mesh(new _three.SphereGeometry(5, 50, 50), new _three.ShaderMaterial({
+    vertexShader: (0, _atmosphereVertexGlslDefault.default),
+    fragmentShader: (0, _atmosphereFragmentGlslDefault.default),
+    blending: _three.AdditiveBlending,
+    side: _three.BackSide
+}));
+atmosphere.scale.set(1.4, 1.4, 1.4);
+scene.add(atmosphere);
 camera.position.z = 10;
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
+    sphere.rotation.y += 0.0001;
 }
 animate();
+const mouse = {
+    x: undefined,
+    y: undefined
+};
+addEventListener("mousemove", ()=>{
+    mouse.x = event.clientX / innerWidth * 2 - 1;
+    mouse.y = -(event.clientY / innerHeight) * 2 + 1;
+    console.log(mouse);
+});
 
-},{"three":"hWlax","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../img/images.jpg":"iam5R","../shaders/vertex.glsl":"6Gepb","../shaders/fragment.glsl":"ajm2l"}],"hWlax":[function(require,module,exports) {
+},{"three":"hWlax","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../img/images.jpg":"iam5R","../shaders/vertex.glsl":"6Gepb","../shaders/fragment.glsl":"ajm2l","../shaders/atmosphereVertex.glsl":"5JFCn","../shaders/atmosphereFragment.glsl":"ltZ4w"}],"hWlax":[function(require,module,exports) {
 /**
  * @license
  * Copyright 2010-2024 Three.js Authors
@@ -32192,10 +32215,16 @@ exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
 },{}],"6Gepb":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nvarying vec2 vertexUV;\nvoid main(){\n    vertexUV = uv;\n   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
+module.exports = "#define GLSLIFY 1\nvarying vec2 vertexUV;\nvarying vec3 vertexNormal;\nvoid main(){\n    vertexUV = uv;\n   vertexNormal = normalize(normalMatrix *  normal);\n   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
 
 },{}],"ajm2l":[function(require,module,exports) {
-module.exports = "#define GLSLIFY 1\nuniform sampler2D globeTexture;\nvarying vec2 vertexUV;\nvoid main(){\n\n    gl_FragColor =     texture2D(globeTexture, vertexUV);\n}";
+module.exports = "#define GLSLIFY 1\nuniform sampler2D globeTexture;\nvarying vec2 vertexUV;\nvarying vec3 vertexNormal;\n\nvoid main(){\n    float intensity = 1.05 - dot(vertexNormal, vec3(0.0, 0.0, 1.0));\n    vec3 atmosphere = vec3(0.3, 0.6, 1.0) * pow(intensity, 1.5);\n    gl_FragColor =     vec4(atmosphere+texture2D(globeTexture, vertexUV).xyz, 1.0);\n}";
+
+},{}],"5JFCn":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvarying vec3 vertexNormal;\nvoid main(){\n    vertexNormal = normalize(normalMatrix *  normal);\n   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );\n}";
+
+},{}],"ltZ4w":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvarying vec3 vertexNormal;\n\nvoid main(){\n    float intensity = pow(0.5 - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);\n    gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;\n}";
 
 },{}]},["j2YDk","1SICI"], "1SICI", "parcelRequire55c9")
 
