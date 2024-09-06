@@ -1,0 +1,16 @@
+{
+  "name": "three-globe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@parcel/transformer-glsl": "^2.12.0",
+    "parcel": "^2.12.0",
+    "vite-plugin-string": "^1.2.3"
+  }
+}
